@@ -2,11 +2,11 @@
   "name": "mypatients-ie",
   "version": "1.0.0",
   "description": "Secure Patient Management System - MYPatients.ie",
-  "main": "server.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
-    "generate-keys": "node generate-keys.js",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "generate-keys": "node src/utils/generate-keys.js",
     "test": "jest --coverage",
     "lint": "eslint .",
     "security-check": "npm audit && snyk test"
