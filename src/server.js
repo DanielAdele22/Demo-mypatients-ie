@@ -10,7 +10,7 @@ const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
-const SecurityConfig = require('./security-config');
+const SecurityConfig = require('../config/security-config');
 
 // Initialize Express app
 const app = express();
