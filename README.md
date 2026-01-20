@@ -14,6 +14,8 @@ A secure patient management system demo with admin dashboard and patient portal.
   - Rate limiting on login attempts
   - Role-based access control
   - Audit logging
+  - user friendly easy to navigate
+  - demo project might be used as a future reference 
  
 ## Future Updates
 - Export Demo as a PDF  
@@ -21,7 +23,7 @@ A secure patient management system demo with admin dashboard and patient portal.
 - Attach test results and personal documents  
 - Appointment history tracking  
 - Medication reminder schedule
-- Mental health checkup                                                                                                                                                                     - - --Configure for Night / Light mode option for website
+- Mental health checkup                                                                                                                                                              
 - open Domain for all  
 
 ## Demo Credentials
