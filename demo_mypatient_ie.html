@@ -1,0 +1,2830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <title>MYPatients.ie - Patient Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f8fafc;
+            --text-primary: #333;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --border-light: #edf2f7;
+            --shadow: rgba(0,0,0,0.06);
+            --shadow-lg: rgba(0,0,0,0.1);
+            --header-bg: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            --stat-number: #1a365d;
+            --link-color: #4299e1;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a202c;
+            --bg-secondary: #2d3748;
+            --bg-tertiary: #374151;
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #a0aec0;
+            --border-color: #4a5568;
+            --border-light: #374151;
+            --shadow: rgba(0,0,0,0.3);
+            --shadow-lg: rgba(0,0,0,0.4);
+            --header-bg: linear-gradient(135deg, #0d1b2a 0%, #1b2838 100%);
+            --stat-number: #90cdf4;
+            --link-color: #63b3ed;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Header */
+        header {
+            background: var(--header-bg);
+            color: white;
+            padding: 0;
+            box-shadow: 0 4px 15px var(--shadow-lg);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .theme-toggle .icon {
+            font-size: 1.2rem;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo-section h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .header-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .header-btn.primary {
+            background: #48bb78;
+            border-color: #48bb78;
+        }
+
+        .header-btn.primary:hover {
+            background: #38a169;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-left: 15px;
+            border-left: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            background: #4299e1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        /* View Switcher */
+        .view-switcher {
+            display: flex;
+            padding: 0 40px;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .view-switch-btn {
+            padding: 12px 25px;
+            color: rgba(255,255,255,0.7);
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .view-switch-btn:hover {
+            color: white;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .view-switch-btn.active {
+            color: white;
+            border-bottom-color: #48bb78;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* View Panels */
+        .view-panel {
+            display: none;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        /* ==================== ADMIN VIEW ==================== */
+
+        /* Stats Dashboard */
+        .stats-dashboard {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .stat-card.total::before { background: #4299e1; }
+        .stat-card.complete::before { background: #48bb78; }
+        .stat-card.progress::before { background: #ecc94b; }
+        .stat-card.attention::before { background: #f56565; }
+        .stat-card.today::before { background: #9f7aea; }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .stat-card.total .stat-icon { background: #ebf8ff; }
+        .stat-card.complete .stat-icon { background: #f0fff4; }
+        .stat-card.progress .stat-icon { background: #fffff0; }
+        .stat-card.attention .stat-icon { background: #fff5f5; }
+        .stat-card.today .stat-icon { background: #faf5ff; }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--stat-number);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            margin-top: 10px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .stat-change.positive { background: #f0fff4; color: #276749; }
+        .stat-change.negative { background: #fff5f5; color: #c53030; }
+
+        /* Section Cards */
+        .section-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--stat-number);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title .icon {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Search and Filters */
+        .controls-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 14px 20px 14px 50px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .search-box input:focus {
+            border-color: var(--link-color);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .filter-group select {
+            padding: 12px 35px 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23718096' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        /* Patient Table */
+        .table-container {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            box-shadow: 0 2px 10px var(--shadow);
+            overflow: hidden;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-tertiary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        th {
+            padding: 16px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border-light);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        td {
+            padding: 16px 15px;
+            vertical-align: middle;
+        }
+
+        /* Patient Cell */
+        .patient-cell {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .patient-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+            color: white;
+        }
+
+        .avatar-male { background: linear-gradient(135deg, #4299e1, #3182ce); }
+        .avatar-female { background: linear-gradient(135deg, #ed64a6, #d53f8c); }
+
+        .patient-info h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .patient-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-complete { background: #c6f6d5; color: #276749; }
+        .status-progress { background: #fefcbf; color: #975a16; }
+        .status-incomplete { background: #fed7d7; color: #c53030; }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-complete .status-dot { background: #38a169; }
+        .status-progress .status-dot { background: #d69e2e; }
+        .status-incomplete .status-dot { background: #e53e3e; }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100px;
+            height: 8px;
+            background: var(--border-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .progress-high { background: linear-gradient(90deg, #48bb78, #38a169); }
+        .progress-medium { background: linear-gradient(90deg, #ecc94b, #d69e2e); }
+        .progress-low { background: linear-gradient(90deg, #fc8181, #f56565); }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .action-btn.primary { background: #4299e1; color: white; }
+        .action-btn.primary:hover { background: #3182ce; }
+        .action-btn.secondary { background: var(--bg-tertiary); color: var(--text-secondary); }
+        .action-btn.secondary:hover { background: var(--border-color); }
+        .action-btn.success { background: #48bb78; color: white; }
+        .action-btn.success:hover { background: #38a169; }
+
+        /* ==================== CLIENT PORTAL ==================== */
+
+        .client-header {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .client-welcome {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .client-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.8rem;
+            color: white;
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+        }
+
+        .client-welcome-text h2 {
+            font-size: 1.5rem;
+            color: var(--stat-number);
+            margin-bottom: 5px;
+        }
+
+        .client-welcome-text p {
+            color: var(--text-muted);
+        }
+
+        .client-quick-stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .quick-stat {
+            text-align: center;
+            padding: 15px 25px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+        }
+
+        .quick-stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--stat-number);
+        }
+
+        .quick-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Client Tabs */
+        .client-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: var(--bg-secondary);
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+
+        .client-tab {
+            padding: 15px 30px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .client-tab:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .client-tab.active {
+            background: #4299e1;
+            color: white;
+        }
+
+        .client-tab .badge {
+            background: rgba(255,255,255,0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        .client-tab.active .badge {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Client Tab Content */
+        .client-tab-content {
+            display: none;
+        }
+
+        .client-tab-content.active {
+            display: block;
+        }
+
+        /* Appointment Cards */
+        .appointment-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .appointment-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 2px 10px var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #4299e1;
+        }
+
+        .appointment-card.past {
+            opacity: 0.7;
+            border-left-color: #a0aec0;
+        }
+
+        .appointment-card.upcoming {
+            border-left-color: #48bb78;
+        }
+
+        .appointment-card.today {
+            border-left-color: #ed8936;
+            background: linear-gradient(to right, #fffaf0, white);
+        }
+
+        .appointment-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .appointment-date {
+            text-align: center;
+            padding: 15px 20px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            min-width: 90px;
+        }
+
+        .appointment-date .month {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .appointment-date .day {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--stat-number);
+            line-height: 1;
+        }
+
+        .appointment-date .year {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .appointment-details h4 {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .appointment-details p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+        }
+
+        .appointment-status {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-confirmed { background: #c6f6d5; color: #276749; }
+        .status-pending { background: #fefcbf; color: #975a16; }
+        .status-completed { background: #e2e8f0; color: #4a5568; }
+        .status-cancelled { background: #fed7d7; color: #c53030; }
+
+        .appointment-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Document Cards */
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .document-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 2px 10px var(--shadow);
+            transition: all 0.2s;
+        }
+
+        .document-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--shadow-lg);
+        }
+
+        .document-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .document-icon.personal { background: #ebf8ff; }
+        .document-icon.insurance { background: #f0fff4; }
+        .document-icon.consent { background: #faf5ff; }
+        .document-icon.id { background: #fffff0; }
+
+        .document-card h4 {
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .document-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+
+        .document-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .document-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .document-status {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 15px;
+        }
+
+        .doc-complete { background: #c6f6d5; color: #276749; }
+        .doc-pending { background: #fefcbf; color: #975a16; }
+        .doc-expired { background: #fed7d7; color: #c53030; }
+
+        /* Medical Reports */
+        .reports-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .report-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            box-shadow: 0 2px 10px var(--shadow);
+            overflow: hidden;
+        }
+
+        .report-header {
+            padding: 20px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-header.lab { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); }
+        .report-header.visit { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
+        .report-header.imaging { background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); }
+        .report-header.prescription { background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%); }
+
+        .report-title h4 {
+            font-size: 1.1rem;
+            margin-bottom: 3px;
+        }
+
+        .report-title p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .report-body {
+            padding: 25px;
+        }
+
+        .report-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 15px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+        }
+
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--stat-number);
+        }
+
+        .summary-value.normal { color: #38a169; }
+        .summary-value.warning { color: #d69e2e; }
+        .summary-value.critical { color: #e53e3e; }
+
+        .summary-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .report-details {
+            border-top: 1px solid var(--border-light);
+            padding-top: 20px;
+        }
+
+        .report-details h5 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .report-details p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .report-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border-light);
+        }
+
+        .report-doctor {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .doctor-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #4299e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .doctor-info {
+            font-size: 0.85rem;
+        }
+
+        .doctor-info .name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .doctor-info .specialty {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* Personal Info Section */
+        .personal-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .info-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+
+        .info-card h4 {
+            font-size: 1rem;
+            color: var(--stat-number);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* Table Footer */
+        .table-footer {
+            padding: 20px 25px;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .results-info {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-btn {
+            padding: 8px 14px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .page-btn.active {
+            background: #4299e1;
+            color: white;
+            border-color: #4299e1;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 25px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.2rem;
+            color: var(--stat-number);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .patient-selector {
+            display: grid;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .patient-select-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .patient-select-item:hover {
+            border-color: var(--link-color);
+            background: var(--bg-tertiary);
+        }
+
+        .patient-select-item.selected {
+            border-color: var(--link-color);
+            background: var(--bg-tertiary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-dashboard {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .personal-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-top {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px 20px;
+            }
+
+            .stats-dashboard {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .client-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .client-tabs {
+                flex-wrap: wrap;
+            }
+
+            .documents-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Login Screen */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            z-index: 3000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-overlay.hidden {
+            display: none;
+        }
+
+        .login-container {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header .logo {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .login-header h2 {
+            color: var(--stat-number);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group input, .form-group select {
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--link-color);
+        }
+
+        .login-btn {
+            padding: 16px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .login-btn:hover {
+            background: #38a169;
+        }
+
+        .login-error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        .login-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .login-info strong {
+            color: var(--text-primary);
+        }
+
+        .logout-btn {
+            background: #e53e3e;
+            border-color: #e53e3e;
+        }
+
+        .logout-btn:hover {
+            background: #c53030;
+        }
+
+        .session-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .session-info .lock-icon {
+            color: #48bb78;
+        }
+
+        /* Access Denied */
+        .access-denied {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .access-denied .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .access-denied h3 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .access-denied p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="logo">🏥</div>
+                <h2>MYPatients.ie</h2>
+                <p>Secure Patient Management System</p>
+            </div>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <div class="login-error" id="loginError">Invalid credentials. Please try again.</div>
+                <div class="form-group">
+                    <label for="loginType">Login As</label>
+                    <select id="loginType" required>
+                        <option value="">Select user type...</option>
+                        <option value="admin">Administrator / Staff</option>
+                        <option value="patient">Patient</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="loginUsername">Username / Patient ID</label>
+                    <input type="text" id="loginUsername" placeholder="Enter username or Patient ID" required maxlength="50" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter password" required maxlength="100" autocomplete="current-password">
+                </div>
+                <button type="submit" class="login-btn">🔐 Secure Login</button>
+            </form>
+            <div class="login-info">
+                <strong>Demo Credentials:</strong><br>
+                Admin: username <code>admin</code> / password <code>admin123</code><br>
+                Patient: Patient ID (e.g., <code>P-10001</code>) / password <code>patient123</code>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-top">
+            <div class="logo-section">
+                <h1>
+                    <span class="logo-icon">🏥</span>
+                    MYPatients.ie
+                </h1>
+            </div>
+            <div class="header-actions">
+                <div class="session-info" id="sessionInfo">
+                    <span class="lock-icon">🔒</span>
+                    <span id="sessionType">Secure Session</span>
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle" title="Toggle Dark/Light Mode">
+                    <span class="icon" id="themeIcon">🌙</span>
+                </button>
+                <button class="header-btn" onclick="window.print()">🖨️ Print</button>
+                <button class="header-btn primary" onclick="openPatientModal()" id="switchPatientBtn" style="display:none;">👤 Switch Patient</button>
+                <button class="header-btn logout-btn" onclick="handleLogout()">🚪 Logout</button>
+                <div class="user-info" id="userInfoSection">
+                    <div class="user-avatar" id="currentUserAvatar">AD</div>
+                    <div>
+                        <div class="user-name" id="currentUserName">Admin View</div>
+                        <div class="user-role" id="currentUserRole">Staff Portal</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="view-switcher">
+            <button class="view-switch-btn active" onclick="switchView('admin')">📊 Admin Dashboard</button>
+            <button class="view-switch-btn" onclick="switchView('client')">👤 Client Portal</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- ==================== ADMIN VIEW ==================== -->
+        <div class="view-panel active" id="adminView">
+            <!-- Stats -->
+            <div class="stats-dashboard">
+                <div class="stat-card total">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-number">10</div>
+                    <div class="stat-label">Total Patients</div>
+                    <div class="stat-change positive">↑ 2 this week</div>
+                </div>
+                <div class="stat-card complete">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-number">2</div>
+                    <div class="stat-label">Intake Complete</div>
+                </div>
+                <div class="stat-card progress">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-number">7</div>
+                    <div class="stat-label">In Progress</div>
+                </div>
+                <div class="stat-card attention">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-number">1</div>
+                    <div class="stat-label">Needs Attention</div>
+                </div>
+                <div class="stat-card today">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Appointments Today</div>
+                </div>
+            </div>
+
+            <!-- All Patients Table -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="icon">👥</span>
+                        All Patients
+                    </div>
+                    <button class="action-btn success">+ Add New Patient</button>
+                </div>
+
+                <div class="controls-row">
+                    <div class="search-box">
+                        <input type="text" id="adminSearch" placeholder="Search patients..." onkeyup="filterAdminTable()">
+                    </div>
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <select id="adminStatusFilter" onchange="filterAdminTable()">
+                            <option value="all">All</option>
+                            <option value="complete">Complete</option>
+                            <option value="progress">In Progress</option>
+                            <option value="incomplete">Incomplete</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-wrapper">
+                        <table id="adminTable">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Contact</th>
+                                    <th>Insurance</th>
+                                    <th>Physician</th>
+                                    <th>Progress</th>
+                                    <th>Status</th>
+                                    <th>Next Appointment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTableBody">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <div class="results-info">Showing <strong id="adminCount">10</strong> of 10 patients</div>
+                        <div class="pagination">
+                            <button class="page-btn">← Prev</button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">Next →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CLIENT PORTAL ==================== -->
+        <div class="view-panel" id="clientView">
+            <!-- Client Header -->
+            <div class="client-header animate-in">
+                <div class="client-welcome">
+                    <div class="client-avatar" id="clientAvatar">JS</div>
+                    <div class="client-welcome-text">
+                        <h2>Welcome, <span id="clientName">John Smith</span>!</h2>
+                        <p>Patient ID: <span id="clientId">P-10001</span> | Member since January 2024</p>
+                    </div>
+                </div>
+                <div class="client-quick-stats">
+                    <div class="quick-stat">
+                        <div class="quick-stat-number" id="clientAppointments">3</div>
+                        <div class="quick-stat-label">Upcoming Appointments</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-number" id="clientDocuments">6</div>
+                        <div class="quick-stat-label">Documents</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-number" id="clientReports">4</div>
+                        <div class="quick-stat-label">Medical Reports</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client Tabs -->
+            <div class="client-tabs">
+                <button class="client-tab active" onclick="switchClientTab('appointments')">
+                    📅 Appointments <span class="badge">3</span>
+                </button>
+                <button class="client-tab" onclick="switchClientTab('documents')">
+                    📄 Documents <span class="badge">6</span>
+                </button>
+                <button class="client-tab" onclick="switchClientTab('reports')">
+                    📋 Medical Reports <span class="badge">4</span>
+                </button>
+                <button class="client-tab" onclick="switchClientTab('personal')">
+                    👤 Personal Info
+                </button>
+            </div>
+
+            <!-- Appointments Tab -->
+            <div class="client-tab-content active" id="appointmentsTab">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span class="icon">📅</span>
+                            Your Appointments
+                        </div>
+                        <button class="action-btn success">+ Request Appointment</button>
+                    </div>
+                    <div class="appointment-list" id="appointmentList">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Tab -->
+            <div class="client-tab-content" id="documentsTab">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span class="icon">📄</span>
+                            Your Documents
+                        </div>
+                        <button class="action-btn primary">📤 Upload Document</button>
+                    </div>
+                    <div class="documents-grid" id="documentsList">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical Reports Tab -->
+            <div class="client-tab-content" id="reportsTab">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span class="icon">📋</span>
+                            Medical Reports & Results
+                        </div>
+                        <div class="filter-group">
+                            <label>Filter:</label>
+                            <select>
+                                <option>All Reports</option>
+                                <option>Lab Results</option>
+                                <option>Visit Summaries</option>
+                                <option>Imaging</option>
+                                <option>Prescriptions</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="reports-list" id="reportsList">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Info Tab -->
+            <div class="client-tab-content" id="personalTab">
+                <div class="personal-info-grid" id="personalInfoGrid">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Selection Modal -->
+    <div class="modal-overlay" id="patientModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Select a Patient</h3>
+                <button class="modal-close" onclick="closePatientModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-box" style="margin-bottom: 20px;">
+                    <input type="text" id="modalSearch" placeholder="Search patients..." onkeyup="filterModalPatients()">
+                </div>
+                <div class="patient-selector" id="patientSelector">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p><strong>MYPatients.ie</strong></p>
+        <p>Sample Data for Demonstration Purposes Only</p>
+    </footer>
+
+    <script>
+        // ==================== API CONFIGURATION ====================
+        // WARNING: In production, API keys should NEVER be stored in client-side code!
+        // Use environment variables and a backend proxy instead.
+        // This is for demonstration purposes only.
+
+        const API_CONFIG = {
+            // Replace with your actual API endpoint
+            baseUrl: 'https://api.mypatients.ie/v1',
+
+            // API Key - In production, this should come from a secure backend
+            // NEVER commit real API keys to version control!
+            apiKey: 'YOUR_API_KEY_HERE', // Replace with your actual API key
+
+            // Request timeout in milliseconds
+            timeout: 30000,
+
+            // API version
+            version: 'v1',
+
+            // Enable/disable API calls (set to true when API is ready)
+            enabled: false
+        };
+
+        // ==================== API SERVICE ====================
+
+        // Secure API request handler
+        async function apiRequest(endpoint, method = 'GET', data = null) {
+            if (!API_CONFIG.enabled) {
+                console.warn('[API] API is disabled. Enable in API_CONFIG to make real requests.');
+                return { success: false, error: 'API disabled', mock: true };
+            }
+
+            if (!API_CONFIG.apiKey || API_CONFIG.apiKey === 'YOUR_API_KEY_HERE') {
+                console.error('[API] API key not configured!');
+                logSecurityEvent('API_ERROR', 'API key not configured');
+                return { success: false, error: 'API key not configured' };
+            }
+
+            const url = `${API_CONFIG.baseUrl}/${endpoint}`;
+
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_CONFIG.apiKey}`,
+                'X-Request-ID': generateRequestId(),
+                'X-Client-Version': API_CONFIG.version
+            };
+
+            const options = {
+                method,
+                headers,
+                credentials: 'same-origin' // Prevent CSRF
+            };
+
+            if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+                options.body = JSON.stringify(sanitizeRequestData(data));
+            }
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+                options.signal = controller.signal;
+
+                const response = await fetch(url, options);
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                logSecurityEvent('API_SUCCESS', `${method} ${endpoint}`);
+                return { success: true, data: result };
+
+            } catch (error) {
+                logSecurityEvent('API_ERROR', `${method} ${endpoint}: ${error.message}`);
+                console.error('[API Error]', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Generate unique request ID for tracking
+        function generateRequestId() {
+            return 'req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Sanitize data before sending to API
+        function sanitizeRequestData(data) {
+            if (typeof data !== 'object' || data === null) return data;
+
+            const sanitized = {};
+            for (const [key, value] of Object.entries(data)) {
+                if (typeof value === 'string') {
+                    sanitized[key] = sanitizeInput(value, 1000);
+                } else if (typeof value === 'object' && value !== null) {
+                    sanitized[key] = sanitizeRequestData(value);
+                } else {
+                    sanitized[key] = value;
+                }
+            }
+            return sanitized;
+        }
+
+        // ==================== API ENDPOINTS ====================
+
+        const PatientAPI = {
+            // Get all patients (admin only)
+            async getAll() {
+                if (!hasAccess('admin_view')) {
+                    return { success: false, error: 'Access denied' };
+                }
+                return await apiRequest('patients', 'GET');
+            },
+
+            // Get single patient
+            async getById(patientId) {
+                if (!hasAccess('patient_data', patientId)) {
+                    return { success: false, error: 'Access denied' };
+                }
+                return await apiRequest(`patients/${encodeURIComponent(patientId)}`, 'GET');
+            },
+
+            // Create new patient (admin only)
+            async create(patientData) {
+                if (!hasAccess('admin_view')) {
+                    return { success: false, error: 'Access denied' };
+                }
+                return await apiRequest('patients', 'POST', patientData);
+            },
+
+            // Update patient
+            async update(patientId, patientData) {
+                if (!hasAccess('patient_data', patientId)) {
+                    return { success: false, error: 'Access denied' };
+                }
+                return await apiRequest(`patients/${encodeURIComponent(patientId)}`, 'PUT', patientData);
+            },
+
+            // Delete patient (admin only)
+            async delete(patientId) {
+                if (!hasAccess('admin_view')) {
+                    return { success: false, error: 'Access denied' };
+                }
+                return await apiRequest(`patients/${encodeURIComponent(patientId)}`, 'DELETE');
+            }
+        };
+
+        const AppointmentAPI = {
+            // Get appointments for a patient
+            async getByPatient(patientId) {
+                if (!hasAccess('patient_data', patientId)) {
+                    return { success: false, error: 'Access denied' };
+                }
+                return await apiRequest(`patients/${encodeURIComponent(patientId)}/appointments`, 'GET');
+            },
+
+            // Create appointment
+            async create(patientId, appointmentData) {
+                if (!hasAccess('patient_data', patientId)) {
+                    return { success: false, error: 'Access denied' };
+                }
+                return await apiRequest(`patients/${encodeURIComponent(patientId)}/appointments`, 'POST', appointmentData);
+            },
+
+            // Update appointment
+            async update(patientId, appointmentId, appointmentData) {
+                if (!hasAccess('patient_data', patientId)) {
+                    return { success: false, error: 'Access denied' };
+                }
+                return await apiRequest(`appointments/${encodeURIComponent(appointmentId)}`, 'PUT', appointmentData);
+            },
+
+            // Cancel appointment
+            async cancel(patientId, appointmentId) {
+                if (!hasAccess('patient_data', patientId)) {
+                    return { success: false, error: 'Access denied' };
+                }
+                return await apiRequest(`appointments/${encodeURIComponent(appointmentId)}`, 'DELETE');
+            }
+        };
+
+        const DocumentAPI = {
+            // Get documents for a patient
+            async getByPatient(patientId) {
+                if (!hasAccess('patient_data', patientId)) {
+                    return { success: false, error: 'Access denied' };
+                }
+                return await apiRequest(`patients/${encodeURIComponent(patientId)}/documents`, 'GET');
+            },
+
+            // Upload document
+            async upload(patientId, documentData) {
+                if (!hasAccess('patient_data', patientId)) {
+                    return { success: false, error: 'Access denied' };
+                }
+                return await apiRequest(`patients/${encodeURIComponent(patientId)}/documents`, 'POST', documentData);
+            }
+        };
+
+        const ReportAPI = {
+            // Get medical reports for a patient
+            async getByPatient(patientId) {
+                if (!hasAccess('patient_data', patientId)) {
+                    return { success: false, error: 'Access denied' };
+                }
+                return await apiRequest(`patients/${encodeURIComponent(patientId)}/reports`, 'GET');
+            }
+        };
+
+        // ==================== SECURITY FUNCTIONS ====================
+
+        // HTML Sanitization to prevent XSS
+        function sanitizeHTML(str) {
+            if (str === null || str === undefined) return '';
+            const div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+
+        // Sanitize and validate input
+        function sanitizeInput(input, maxLength = 100) {
+            if (typeof input !== 'string') return '';
+            // Remove potentially dangerous characters
+            let sanitized = input.replace(/[<>\"'&]/g, '');
+            // Limit length
+            sanitized = sanitized.substring(0, maxLength);
+            return sanitized.trim();
+        }
+
+        // Validate email format
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Validate phone format
+        function isValidPhone(phone) {
+            const phoneRegex = /^[\d\-\+\(\)\s]+$/;
+            return phoneRegex.test(phone);
+        }
+
+        // Rate limiting for login attempts
+        const loginAttempts = {
+            count: 0,
+            lastAttempt: null,
+            maxAttempts: 5,
+            lockoutTime: 300000 // 5 minutes
+        };
+
+        function checkRateLimit() {
+            const now = Date.now();
+            if (loginAttempts.lastAttempt && (now - loginAttempts.lastAttempt) > loginAttempts.lockoutTime) {
+                loginAttempts.count = 0;
+            }
+            return loginAttempts.count < loginAttempts.maxAttempts;
+        }
+
+        function recordLoginAttempt(success) {
+            if (success) {
+                loginAttempts.count = 0;
+            } else {
+                loginAttempts.count++;
+                loginAttempts.lastAttempt = Date.now();
+            }
+        }
+
+        // ==================== AUTHENTICATION SYSTEM ====================
+
+        // Session management
+        let currentSession = {
+            isAuthenticated: false,
+            userType: null, // 'admin' or 'patient'
+            userId: null,
+            username: null,
+            loginTime: null,
+            sessionToken: null
+        };
+
+        // Demo credentials (in production, this would be server-side)
+        const credentials = {
+            admin: {
+                username: 'admin',
+                // In production, passwords would be hashed
+                passwordHash: 'admin123'
+            }
+        };
+
+        // Generate session token
+        function generateSessionToken() {
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Handle login
+        function handleLogin(event) {
+            event.preventDefault();
+
+            if (!checkRateLimit()) {
+                const errorEl = document.getElementById('loginError');
+                errorEl.textContent = 'Too many login attempts. Please wait 5 minutes.';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            const loginType = sanitizeInput(document.getElementById('loginType').value);
+            const username = sanitizeInput(document.getElementById('loginUsername').value, 50);
+            const password = document.getElementById('loginPassword').value;
+
+            const errorEl = document.getElementById('loginError');
+            errorEl.classList.remove('show');
+
+            let authenticated = false;
+
+            if (loginType === 'admin') {
+                if (username === credentials.admin.username && password === credentials.admin.passwordHash) {
+                    authenticated = true;
+                    currentSession = {
+                        isAuthenticated: true,
+                        userType: 'admin',
+                        userId: 'admin',
+                        username: username,
+                        loginTime: new Date(),
+                        sessionToken: generateSessionToken()
+                    };
+                }
+            } else if (loginType === 'patient') {
+                // Find patient by ID
+                const patient = patients.find(p => p.id === username);
+                if (patient && password === 'patient123') {
+                    authenticated = true;
+                    currentSession = {
+                        isAuthenticated: true,
+                        userType: 'patient',
+                        userId: patient.id,
+                        username: patient.firstName + ' ' + patient.lastName,
+                        loginTime: new Date(),
+                        sessionToken: generateSessionToken()
+                    };
+                    currentPatient = patient;
+                }
+            }
+
+            recordLoginAttempt(authenticated);
+
+            if (authenticated) {
+                // Store session (in production, use httpOnly cookies)
+                sessionStorage.setItem('session', JSON.stringify({
+                    ...currentSession,
+                    sessionToken: undefined // Don't store token in sessionStorage
+                }));
+
+                document.getElementById('loginOverlay').classList.add('hidden');
+                initializeApp();
+                logSecurityEvent('LOGIN_SUCCESS', `User ${currentSession.username} logged in as ${currentSession.userType}`);
+            } else {
+                errorEl.textContent = 'Invalid credentials. Please try again.';
+                errorEl.classList.add('show');
+                logSecurityEvent('LOGIN_FAILED', `Failed login attempt for ${username}`);
+            }
+
+            // Clear password field
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // Handle logout
+        function handleLogout() {
+            logSecurityEvent('LOGOUT', `User ${currentSession.username} logged out`);
+
+            currentSession = {
+                isAuthenticated: false,
+                userType: null,
+                userId: null,
+                username: null,
+                loginTime: null,
+                sessionToken: null
+            };
+
+            sessionStorage.removeItem('session');
+            document.getElementById('loginOverlay').classList.remove('hidden');
+
+            // Clear form
+            document.getElementById('loginType').value = '';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginError').classList.remove('show');
+        }
+
+        // Check if user has access to resource
+        function hasAccess(resource, patientId = null) {
+            if (!currentSession.isAuthenticated) return false;
+
+            if (currentSession.userType === 'admin') {
+                return true; // Admin has access to everything
+            }
+
+            if (currentSession.userType === 'patient') {
+                // Patients can only access their own data
+                if (resource === 'admin_view') {
+                    return false; // Patients cannot access admin views
+                }
+                if (resource === 'patient_data' && patientId) {
+                    return currentSession.userId === patientId;
+                }
+                if (resource === 'own_data') {
+                    return true;
+                }
+                return false;
+            }
+
+            return false;
+        }
+
+        // Security event logging
+        function logSecurityEvent(eventType, details) {
+            const event = {
+                timestamp: new Date().toISOString(),
+                type: eventType,
+                details: details,
+                userId: currentSession.userId,
+                userType: currentSession.userType
+            };
+            console.log('[SECURITY]', event);
+            // In production, send to server for audit logging
+        }
+
+        // ==================== THEME TOGGLE ====================
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('themeIcon');
+
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const themeIcon = document.getElementById('themeIcon');
+
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                themeIcon.textContent = '🌙';
+            }
+        }
+
+        // ==================== PATIENT DATA ====================
+        const patients = [
+            {
+                id: 'P-10001', firstName: 'John', lastName: 'Smith', dob: 'Mar 15, 1985', gender: 'Male',
+                phone: '555-123-4567', email: 'john.smith@email.com', address: '123 Oak Street, Springfield, IL 62701',
+                insurance: 'Blue Cross', policyNumber: 'BC-445521', physician: 'Dr. Sarah Johnson',
+                emergencyContact: 'Mary Smith', emergencyPhone: '555-123-4568',
+                progress: 75, status: 'progress', nextAppointment: 'Jan 25, 2024 - 10:00 AM'
+            },
+            {
+                id: 'P-10002', firstName: 'Emily', lastName: 'Davis', dob: 'Jul 22, 1992', gender: 'Female',
+                phone: '555-234-5678', email: 'emily.davis@email.com', address: '456 Maple Avenue, Springfield, IL 62702',
+                insurance: 'Aetna', policyNumber: 'AE-778834', physician: 'Dr. Michael Chen',
+                emergencyContact: 'Robert Davis', emergencyPhone: '555-234-5679',
+                progress: 75, status: 'progress', nextAppointment: 'Jan 26, 2024 - 2:30 PM'
+            },
+            {
+                id: 'P-10003', firstName: 'Robert', lastName: 'Johnson', dob: 'Nov 8, 1978', gender: 'Male',
+                phone: '555-345-6789', email: 'robert.j@email.com', address: '789 Pine Road, Decatur, IL 62521',
+                insurance: 'United Health', policyNumber: 'UH-112233', physician: 'Dr. Sarah Johnson',
+                emergencyContact: 'Lisa Johnson', emergencyPhone: '555-345-6780',
+                progress: 62, status: 'progress', nextAppointment: 'Feb 1, 2024 - 9:00 AM'
+            },
+            {
+                id: 'P-10004', firstName: 'Maria', lastName: 'Garcia', dob: 'May 30, 1965', gender: 'Female',
+                phone: '555-456-7890', email: 'maria.garcia@email.com', address: '321 Elm Court, Champaign, IL 61820',
+                insurance: 'Medicare', policyNumber: 'MC-556677', physician: 'Dr. Amanda White',
+                emergencyContact: 'Carlos Garcia', emergencyPhone: '555-456-7891',
+                progress: 75, status: 'progress', nextAppointment: 'Jan 28, 2024 - 11:00 AM'
+            },
+            {
+                id: 'P-10005', firstName: 'James', lastName: 'Williams', dob: 'Sep 12, 1990', gender: 'Male',
+                phone: '555-567-8901', email: 'james.w@email.com', address: '654 Birch Lane, Urbana, IL 61801',
+                insurance: 'Cigna', policyNumber: 'CG-889900', physician: 'Dr. Michael Chen',
+                emergencyContact: 'Sarah Williams', emergencyPhone: '555-567-8902',
+                progress: 100, status: 'complete', nextAppointment: 'Jan 24, 2024 - 3:00 PM'
+            },
+            {
+                id: 'P-10006', firstName: 'Jennifer', lastName: 'Brown', dob: 'Jan 25, 1988', gender: 'Female',
+                phone: '555-678-9012', email: 'jen.brown@email.com', address: '987 Cedar Drive, Bloomington, IL 61701',
+                insurance: 'Blue Cross', policyNumber: 'BC-334455', physician: 'Dr. Amanda White',
+                emergencyContact: 'Tom Brown', emergencyPhone: '555-678-9013',
+                progress: 50, status: 'progress', nextAppointment: 'Feb 5, 2024 - 1:00 PM'
+            },
+            {
+                id: 'P-10007', firstName: 'Michael', lastName: 'Martinez', dob: 'Dec 3, 1955', gender: 'Male',
+                phone: '555-789-0123', email: 'm.martinez@email.com', address: '147 Walnut Street, Peoria, IL 61602',
+                insurance: 'Medicare', policyNumber: 'MC-667788', physician: 'Dr. Sarah Johnson',
+                emergencyContact: 'Ana Martinez', emergencyPhone: '555-789-0124',
+                progress: 100, status: 'complete', nextAppointment: 'Jan 30, 2024 - 10:30 AM'
+            },
+            {
+                id: 'P-10008', firstName: 'Sarah', lastName: 'Anderson', dob: 'Apr 18, 2000', gender: 'Female',
+                phone: '555-890-1234', email: 's.anderson@email.com', address: '258 Spruce Way, Normal, IL 61761',
+                insurance: 'Aetna', policyNumber: 'AE-990011', physician: 'Dr. Michael Chen',
+                emergencyContact: 'David Anderson', emergencyPhone: '555-890-1235',
+                progress: 0, status: 'incomplete', nextAppointment: 'Pending Registration'
+            },
+            {
+                id: 'P-10009', firstName: 'David', lastName: 'Taylor', dob: 'Aug 7, 1972', gender: 'Male',
+                phone: '555-901-2345', email: 'd.taylor@email.com', address: '369 Ash Boulevard, Springfield, IL 62704',
+                insurance: 'United Health', policyNumber: 'UH-223344', physician: 'Dr. Amanda White',
+                emergencyContact: 'Karen Taylor', emergencyPhone: '555-901-2346',
+                progress: 87, status: 'progress', nextAppointment: 'Jan 27, 2024 - 4:00 PM'
+            },
+            {
+                id: 'P-10010', firstName: 'Lisa', lastName: 'Thomas', dob: 'Jun 20, 1983', gender: 'Female',
+                phone: '555-012-3456', email: 'lisa.t@email.com', address: '741 Willow Circle, Decatur, IL 62526',
+                insurance: 'Cigna', policyNumber: 'CG-445566', physician: 'Dr. Sarah Johnson',
+                emergencyContact: 'Mark Thomas', emergencyPhone: '555-012-3457',
+                progress: 87, status: 'progress', nextAppointment: 'Feb 2, 2024 - 9:30 AM'
+            }
+        ];
+
+        let currentPatient = patients[0];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTheme();
+
+            // Check for existing session
+            const savedSession = sessionStorage.getItem('session');
+            if (savedSession) {
+                try {
+                    const session = JSON.parse(savedSession);
+                    // Validate session
+                    if (session.isAuthenticated && session.userType && session.userId) {
+                        currentSession = {
+                            ...session,
+                            sessionToken: generateSessionToken()
+                        };
+
+                        if (session.userType === 'patient') {
+                            const patient = patients.find(p => p.id === session.userId);
+                            if (patient) {
+                                currentPatient = patient;
+                            }
+                        }
+
+                        document.getElementById('loginOverlay').classList.add('hidden');
+                        initializeApp();
+                        return;
+                    }
+                } catch (e) {
+                    sessionStorage.removeItem('session');
+                }
+            }
+        });
+
+        // Initialize app after authentication
+        function initializeApp() {
+            updateUIForUserType();
+            renderAdminTable();
+            renderPatientSelector();
+            updateClientView();
+        }
+
+        // Update UI based on user type
+        function updateUIForUserType() {
+            const switchPatientBtn = document.getElementById('switchPatientBtn');
+            const sessionType = document.getElementById('sessionType');
+            const viewSwitcher = document.querySelector('.view-switcher');
+
+            if (currentSession.userType === 'admin') {
+                switchPatientBtn.style.display = 'flex';
+                sessionType.textContent = 'Admin Session';
+                viewSwitcher.style.display = 'flex';
+
+                // Show admin view by default
+                document.getElementById('adminView').classList.add('active');
+                document.getElementById('clientView').classList.remove('active');
+
+                document.getElementById('currentUserName').textContent = 'Admin View';
+                document.getElementById('currentUserRole').textContent = 'Staff Portal';
+                document.getElementById('currentUserAvatar').textContent = 'AD';
+            } else if (currentSession.userType === 'patient') {
+                switchPatientBtn.style.display = 'none';
+                sessionType.textContent = 'Patient Session';
+                viewSwitcher.style.display = 'none';
+
+                // Show client view only for patients
+                document.getElementById('adminView').classList.remove('active');
+                document.getElementById('clientView').classList.add('active');
+
+                document.getElementById('currentUserName').textContent = currentPatient.firstName + ' ' + currentPatient.lastName;
+                document.getElementById('currentUserRole').textContent = 'Patient Portal';
+                document.getElementById('currentUserAvatar').textContent = currentPatient.firstName[0] + currentPatient.lastName[0];
+            }
+        }
+
+        // View Switching (with access control)
+        function switchView(view) {
+            // Only admins can switch views
+            if (currentSession.userType !== 'admin') {
+                logSecurityEvent('ACCESS_DENIED', 'Patient tried to switch views');
+                return;
+            }
+
+            document.querySelectorAll('.view-switch-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(view + 'View').classList.add('active');
+
+            if (view === 'client') {
+                document.getElementById('currentUserName').textContent = sanitizeHTML(currentPatient.firstName) + ' ' + sanitizeHTML(currentPatient.lastName);
+                document.getElementById('currentUserRole').textContent = 'Patient Portal';
+                document.getElementById('currentUserAvatar').textContent = sanitizeHTML(currentPatient.firstName[0]) + sanitizeHTML(currentPatient.lastName[0]);
+            } else {
+                document.getElementById('currentUserName').textContent = 'Admin View';
+                document.getElementById('currentUserRole').textContent = 'Staff Portal';
+                document.getElementById('currentUserAvatar').textContent = 'AD';
+            }
+
+            logSecurityEvent('VIEW_SWITCH', `Switched to ${view} view`);
+        }
+
+        // Client Tab Switching
+        function switchClientTab(tab) {
+            document.querySelectorAll('.client-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.client-tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+        }
+
+        // Render Admin Table (with sanitization)
+        function renderAdminTable() {
+            if (!hasAccess('admin_view')) {
+                return;
+            }
+
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+
+            patients.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.dataset.id = sanitizeHTML(p.id);
+                tr.dataset.status = sanitizeHTML(p.status);
+                tr.onclick = () => selectPatientFromTable(p.id);
+
+                const progressClass = p.progress >= 75 ? 'progress-high' : p.progress >= 50 ? 'progress-medium' : 'progress-low';
+                const statusText = p.status === 'complete' ? 'Complete' : p.status === 'progress' ? 'In Progress' : 'Incomplete';
+
+                tr.innerHTML = `
+                    <td>
+                        <div class="patient-cell">
+                            <div class="patient-avatar avatar-${sanitizeHTML(p.gender.toLowerCase())}">${sanitizeHTML(p.firstName[0])}${sanitizeHTML(p.lastName[0])}</div>
+                            <div class="patient-info">
+                                <h4>${sanitizeHTML(p.firstName)} ${sanitizeHTML(p.lastName)}</h4>
+                                <div class="patient-meta">${sanitizeHTML(p.id)} • ${sanitizeHTML(p.dob)}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${sanitizeHTML(p.phone)}<br><span style="color: var(--link-color); font-size: 0.85rem;">${sanitizeHTML(p.email)}</span></td>
+                    <td>${sanitizeHTML(p.insurance)}<br><span style="color: var(--text-muted); font-size: 0.85rem;">${sanitizeHTML(p.policyNumber)}</span></td>
+                    <td>${sanitizeHTML(p.physician)}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill ${progressClass}" style="width: ${parseInt(p.progress)}%"></div>
+                            </div>
+                            <span style="font-size: 0.85rem; font-weight: 600;">${parseInt(p.progress)}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge status-${sanitizeHTML(p.status)}">
+                            <span class="status-dot"></span>
+                            ${sanitizeHTML(statusText)}
+                        </span>
+                    </td>
+                    <td style="font-size: 0.9rem;">${sanitizeHTML(p.nextAppointment)}</td>
+                    <td>
+                        <button class="action-btn primary">View</button>
+                    </td>
+                `;
+
+                // Add click handler for view button
+                const viewBtn = tr.querySelector('.action-btn.primary');
+                viewBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    viewPatient(p.id);
+                };
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Filter Admin Table (with input validation)
+        function filterAdminTable() {
+            if (!hasAccess('admin_view')) {
+                return;
+            }
+
+            // Sanitize and validate search input
+            const rawSearch = document.getElementById('adminSearch').value;
+            const search = sanitizeInput(rawSearch, 50).toLowerCase();
+
+            // Validate status filter
+            const statusFilter = document.getElementById('adminStatusFilter');
+            const validStatuses = ['all', 'complete', 'progress', 'incomplete'];
+            const status = validStatuses.includes(statusFilter.value) ? statusFilter.value : 'all';
+
+            const rows = document.querySelectorAll('#adminTableBody tr');
+            let count = 0;
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const rowStatus = row.dataset.status;
+                const matchSearch = text.includes(search);
+                const matchStatus = status === 'all' || rowStatus === status;
+
+                if (matchSearch && matchStatus) {
+                    row.style.display = '';
+                    count++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('adminCount').textContent = count;
+            logSecurityEvent('SEARCH', `Admin searched for: ${search}, status: ${status}`);
+        }
+
+        // Select Patient from Table (admin only)
+        function selectPatientFromTable(id) {
+            if (!hasAccess('admin_view')) {
+                logSecurityEvent('ACCESS_DENIED', 'Unauthorized access to selectPatientFromTable');
+                return;
+            }
+
+            const patient = patients.find(p => p.id === sanitizeInput(id));
+            if (!patient) {
+                logSecurityEvent('INVALID_ACCESS', `Invalid patient ID: ${id}`);
+                return;
+            }
+
+            currentPatient = patient;
+            logSecurityEvent('PATIENT_SELECT', `Admin selected patient: ${patient.id}`);
+            switchView('client');
+            updateClientView();
+        }
+
+        // View Patient (admin only)
+        function viewPatient(id) {
+            if (!hasAccess('admin_view')) {
+                logSecurityEvent('ACCESS_DENIED', 'Unauthorized access to viewPatient');
+                return;
+            }
+
+            const patient = patients.find(p => p.id === sanitizeInput(id));
+            if (!patient) {
+                logSecurityEvent('INVALID_ACCESS', `Invalid patient ID: ${id}`);
+                return;
+            }
+
+            currentPatient = patient;
+            logSecurityEvent('PATIENT_VIEW', `Admin viewing patient: ${patient.id}`);
+            updateClientView();
+            switchView('client');
+            document.querySelector('.view-switch-btn:nth-child(2)').click();
+        }
+
+        // Update Client View (with access control)
+        function updateClientView() {
+            // Check if user has access to this patient's data
+            const canAccess = currentSession.userType === 'admin' ||
+                              (currentSession.userType === 'patient' && currentSession.userId === currentPatient.id);
+
+            if (!canAccess) {
+                logSecurityEvent('ACCESS_DENIED', `User ${currentSession.userId} tried to access patient ${currentPatient.id}`);
+                showAccessDenied();
+                return;
+            }
+
+            const p = currentPatient;
+
+            // Header (sanitized)
+            document.getElementById('clientAvatar').textContent = sanitizeHTML(p.firstName[0]) + sanitizeHTML(p.lastName[0]);
+            document.getElementById('clientName').textContent = sanitizeHTML(p.firstName) + ' ' + sanitizeHTML(p.lastName);
+            document.getElementById('clientId').textContent = sanitizeHTML(p.id);
+
+            // Render tabs content
+            renderAppointments();
+            renderDocuments();
+            renderReports();
+            renderPersonalInfo();
+        }
+
+        // Show access denied message
+        function showAccessDenied() {
+            const clientView = document.getElementById('clientView');
+            clientView.innerHTML = `
+                <div class="access-denied">
+                    <div class="icon">🔒</div>
+                    <h3>Access Denied</h3>
+                    <p>You do not have permission to view this patient's information.</p>
+                    <button class="action-btn primary" onclick="handleLogout()">Return to Login</button>
+                </div>
+            `;
+        }
+
+        // Patient-specific appointments
+        const patientAppointments = {
+            'P-10001': [
+                { month: 'JAN', day: '25', year: '2024', type: 'Annual Physical Exam', doctor: 'Dr. Sarah Johnson', time: '10:00 AM', status: 'today', statusText: 'Today' },
+                { month: 'FEB', day: '08', year: '2024', type: 'Blood Work Follow-up', doctor: 'Dr. Sarah Johnson', time: '9:30 AM', status: 'upcoming', statusText: 'Confirmed' },
+                { month: 'FEB', day: '22', year: '2024', type: 'Lab Work', doctor: 'Lab Services', time: '8:00 AM', status: 'upcoming', statusText: 'Pending' },
+                { month: 'JAN', day: '10', year: '2024', type: 'Initial Consultation', doctor: 'Dr. Sarah Johnson', time: '11:00 AM', status: 'past', statusText: 'Completed' },
+                { month: 'DEC', day: '15', year: '2023', type: 'Routine Checkup', doctor: 'Dr. Sarah Johnson', time: '3:00 PM', status: 'past', statusText: 'Completed' }
+            ],
+            'P-10002': [
+                { month: 'JAN', day: '26', year: '2024', type: 'Gynecological Exam', doctor: 'Dr. Michael Chen', time: '2:30 PM', status: 'upcoming', statusText: 'Confirmed' },
+                { month: 'FEB', day: '14', year: '2024', type: 'Lab Results Review', doctor: 'Dr. Michael Chen', time: '10:00 AM', status: 'upcoming', statusText: 'Confirmed' },
+                { month: 'MAR', day: '05', year: '2024', type: 'Wellness Check', doctor: 'Dr. Michael Chen', time: '3:00 PM', status: 'upcoming', statusText: 'Pending' },
+                { month: 'JAN', day: '12', year: '2024', type: 'New Patient Visit', doctor: 'Dr. Michael Chen', time: '9:00 AM', status: 'past', statusText: 'Completed' },
+                { month: 'DEC', day: '20', year: '2023', type: 'Flu Shot', doctor: 'Nurse Station', time: '11:30 AM', status: 'past', statusText: 'Completed' }
+            ],
+            'P-10003': [
+                { month: 'FEB', day: '01', year: '2024', type: 'Cardiology Consultation', doctor: 'Dr. Sarah Johnson', time: '9:00 AM', status: 'upcoming', statusText: 'Confirmed' },
+                { month: 'FEB', day: '15', year: '2024', type: 'EKG Test', doctor: 'Cardiology Dept', time: '8:30 AM', status: 'upcoming', statusText: 'Pending' },
+                { month: 'MAR', day: '01', year: '2024', type: 'Follow-up Visit', doctor: 'Dr. Sarah Johnson', time: '2:00 PM', status: 'upcoming', statusText: 'Pending' },
+                { month: 'JAN', day: '15', year: '2024', type: 'Blood Pressure Check', doctor: 'Dr. Sarah Johnson', time: '10:30 AM', status: 'past', statusText: 'Completed' },
+                { month: 'NOV', day: '28', year: '2023', type: 'Annual Physical', doctor: 'Dr. Sarah Johnson', time: '1:00 PM', status: 'past', statusText: 'Completed' }
+            ],
+            'P-10004': [
+                { month: 'JAN', day: '28', year: '2024', type: 'Diabetes Management', doctor: 'Dr. Amanda White', time: '11:00 AM', status: 'upcoming', statusText: 'Confirmed' },
+                { month: 'FEB', day: '11', year: '2024', type: 'A1C Test', doctor: 'Lab Services', time: '7:30 AM', status: 'upcoming', statusText: 'Confirmed' },
+                { month: 'FEB', day: '25', year: '2024', type: 'Nutrition Counseling', doctor: 'Dietitian Services', time: '1:00 PM', status: 'upcoming', statusText: 'Pending' },
+                { month: 'JAN', day: '14', year: '2024', type: 'Medication Review', doctor: 'Dr. Amanda White', time: '3:30 PM', status: 'past', statusText: 'Completed' },
+                { month: 'DEC', day: '10', year: '2023', type: 'Quarterly Checkup', doctor: 'Dr. Amanda White', time: '10:00 AM', status: 'past', statusText: 'Completed' }
+            ],
+            'P-10005': [
+                { month: 'JAN', day: '24', year: '2024', type: 'Sports Physical', doctor: 'Dr. Michael Chen', time: '3:00 PM', status: 'today', statusText: 'Today' },
+                { month: 'MAR', day: '15', year: '2024', type: 'Follow-up Visit', doctor: 'Dr. Michael Chen', time: '11:00 AM', status: 'upcoming', statusText: 'Pending' },
+                { month: 'JAN', day: '08', year: '2024', type: 'Vaccination Update', doctor: 'Nurse Station', time: '9:00 AM', status: 'past', statusText: 'Completed' },
+                { month: 'OCT', day: '20', year: '2023', type: 'Annual Wellness Exam', doctor: 'Dr. Michael Chen', time: '2:30 PM', status: 'past', statusText: 'Completed' }
+            ],
+            'P-10006': [
+                { month: 'FEB', day: '05', year: '2024', type: 'Dermatology Referral', doctor: 'Dr. Amanda White', time: '1:00 PM', status: 'upcoming', statusText: 'Confirmed' },
+                { month: 'FEB', day: '19', year: '2024', type: 'Skin Check', doctor: 'Dermatology Dept', time: '10:30 AM', status: 'upcoming', statusText: 'Pending' },
+                { month: 'MAR', day: '10', year: '2024', type: 'Follow-up Appointment', doctor: 'Dr. Amanda White', time: '3:00 PM', status: 'upcoming', statusText: 'Pending' },
+                { month: 'JAN', day: '18', year: '2024', type: 'New Patient Intake', doctor: 'Dr. Amanda White', time: '11:00 AM', status: 'past', statusText: 'Completed' }
+            ],
+            'P-10007': [
+                { month: 'JAN', day: '30', year: '2024', type: 'Diabetes Quarterly Review', doctor: 'Dr. Sarah Johnson', time: '10:30 AM', status: 'upcoming', statusText: 'Confirmed' },
+                { month: 'FEB', day: '13', year: '2024', type: 'Foot Examination', doctor: 'Podiatry Services', time: '2:00 PM', status: 'upcoming', statusText: 'Confirmed' },
+                { month: 'APR', day: '30', year: '2024', type: 'Quarterly Checkup', doctor: 'Dr. Sarah Johnson', time: '9:00 AM', status: 'upcoming', statusText: 'Pending' },
+                { month: 'JAN', day: '02', year: '2024', type: 'Blood Sugar Review', doctor: 'Dr. Sarah Johnson', time: '11:00 AM', status: 'past', statusText: 'Completed' },
+                { month: 'OCT', day: '30', year: '2023', type: 'Annual Diabetes Exam', doctor: 'Dr. Sarah Johnson', time: '10:00 AM', status: 'past', statusText: 'Completed' }
+            ],
+            'P-10008': [
+                { month: 'TBD', day: '--', year: '----', type: 'Initial Consultation', doctor: 'Dr. Michael Chen', time: 'Pending', status: 'upcoming', statusText: 'Not Scheduled' },
+                { month: 'TBD', day: '--', year: '----', type: 'Complete Registration First', doctor: 'Front Desk', time: 'Required', status: 'upcoming', statusText: 'Action Required' }
+            ],
+            'P-10009': [
+                { month: 'JAN', day: '27', year: '2024', type: 'Hypertension Follow-up', doctor: 'Dr. Amanda White', time: '4:00 PM', status: 'upcoming', statusText: 'Confirmed' },
+                { month: 'FEB', day: '10', year: '2024', type: 'Blood Pressure Monitoring', doctor: 'Dr. Amanda White', time: '9:00 AM', status: 'upcoming', statusText: 'Confirmed' },
+                { month: 'FEB', day: '24', year: '2024', type: 'Stress Test', doctor: 'Cardiology Dept', time: '8:00 AM', status: 'upcoming', statusText: 'Pending' },
+                { month: 'JAN', day: '13', year: '2024', type: 'Medication Adjustment', doctor: 'Dr. Amanda White', time: '2:30 PM', status: 'past', statusText: 'Completed' },
+                { month: 'DEC', day: '06', year: '2023', type: 'Initial Assessment', doctor: 'Dr. Amanda White', time: '11:00 AM', status: 'past', statusText: 'Completed' }
+            ],
+            'P-10010': [
+                { month: 'FEB', day: '02', year: '2024', type: "Women's Health Exam", doctor: 'Dr. Sarah Johnson', time: '9:30 AM', status: 'upcoming', statusText: 'Confirmed' },
+                { month: 'FEB', day: '16', year: '2024', type: 'Mammogram', doctor: 'Imaging Center', time: '11:00 AM', status: 'upcoming', statusText: 'Confirmed' },
+                { month: 'MAR', day: '08', year: '2024', type: 'Results Review', doctor: 'Dr. Sarah Johnson', time: '2:00 PM', status: 'upcoming', statusText: 'Pending' },
+                { month: 'JAN', day: '19', year: '2024', type: 'Annual Physical', doctor: 'Dr. Sarah Johnson', time: '10:00 AM', status: 'past', statusText: 'Completed' },
+                { month: 'SEP', day: '15', year: '2023', type: 'Wellness Visit', doctor: 'Dr. Sarah Johnson', time: '3:30 PM', status: 'past', statusText: 'Completed' }
+            ]
+        };
+
+        // Render Appointments (with sanitization)
+        function renderAppointments() {
+            const appointments = patientAppointments[currentPatient.id] || [];
+            const container = document.getElementById('appointmentList');
+            container.innerHTML = '';
+
+            appointments.forEach(a => {
+                const statusClass = a.status === 'past' ? 'completed' : a.status === 'today' ? 'confirmed' : 'pending';
+                const card = document.createElement('div');
+                card.className = `appointment-card ${sanitizeHTML(a.status)}`;
+
+                card.innerHTML = `
+                    <div class="appointment-info">
+                        <div class="appointment-date">
+                            <div class="month">${sanitizeHTML(a.month)}</div>
+                            <div class="day">${sanitizeHTML(a.day)}</div>
+                            <div class="year">${sanitizeHTML(a.year)}</div>
+                        </div>
+                        <div class="appointment-details">
+                            <h4>${sanitizeHTML(a.type)}</h4>
+                            <p>🩺 ${sanitizeHTML(a.doctor)}</p>
+                            <p>🕐 ${sanitizeHTML(a.time)}</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span class="appointment-status status-${statusClass}">${sanitizeHTML(a.statusText)}</span>
+                        <div class="appointment-actions">
+                            ${a.status !== 'past' ? '<button class="action-btn secondary">Reschedule</button>' : ''}
+                            <button class="action-btn primary">Details</button>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Render Documents (with sanitization)
+        function renderDocuments() {
+            const documents = [
+                { icon: '👤', iconClass: 'personal', title: 'Personal Information Form', desc: 'Basic demographic and contact information', date: 'Updated Jan 15, 2024', status: 'complete', statusText: 'Complete' },
+                { icon: '🏥', iconClass: 'insurance', title: 'Insurance Card', desc: sanitizeHTML(currentPatient.insurance) + ' - ' + sanitizeHTML(currentPatient.policyNumber), date: 'Verified Jan 10, 2024', status: 'complete', statusText: 'Verified' },
+                { icon: '📋', iconClass: 'consent', title: 'Medical History Form', desc: 'Past medical conditions, surgeries, allergies', date: 'Updated Jan 15, 2024', status: 'complete', statusText: 'Complete' },
+                { icon: '✍️', iconClass: 'consent', title: 'Consent Forms', desc: 'Treatment consent and HIPAA acknowledgment', date: 'Signed Jan 10, 2024', status: 'complete', statusText: 'Signed' },
+                { icon: '🪪', iconClass: 'id', title: 'Photo ID', desc: 'Government-issued identification', date: 'Verified Jan 10, 2024', status: 'complete', statusText: 'Verified' },
+                { icon: '💊', iconClass: 'personal', title: 'Current Medications List', desc: 'List of all current medications and dosages', date: 'Last updated Dec 20, 2023', status: 'pending', statusText: 'Update Needed' }
+            ];
+
+            const container = document.getElementById('documentsList');
+            container.innerHTML = '';
+
+            documents.forEach(d => {
+                const card = document.createElement('div');
+                card.className = 'document-card';
+
+                card.innerHTML = `
+                    <div class="document-icon ${sanitizeHTML(d.iconClass)}">${d.icon}</div>
+                    <h4>${sanitizeHTML(d.title)}</h4>
+                    <p>${sanitizeHTML(d.desc)}</p>
+                    <div class="document-meta">
+                        <span class="document-date">${sanitizeHTML(d.date)}</span>
+                        <span class="document-status doc-${sanitizeHTML(d.status)}">${sanitizeHTML(d.statusText)}</span>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Render Reports (with sanitization)
+        function renderReports() {
+            const reports = [
+                {
+                    type: 'lab', title: 'Complete Blood Count (CBC)', date: 'January 15, 2024',
+                    summary: [
+                        { label: 'WBC', value: '7.2', unit: 'K/uL', status: 'normal' },
+                        { label: 'RBC', value: '4.8', unit: 'M/uL', status: 'normal' },
+                        { label: 'Hemoglobin', value: '14.2', unit: 'g/dL', status: 'normal' },
+                        { label: 'Platelets', value: '250', unit: 'K/uL', status: 'normal' }
+                    ],
+                    notes: 'All values within normal range. No abnormalities detected.',
+                    doctor: 'Dr. Sarah Johnson', specialty: 'Primary Care'
+                },
+                {
+                    type: 'visit', title: 'Annual Physical Examination', date: 'January 10, 2024',
+                    summary: [
+                        { label: 'Blood Pressure', value: '120/80', unit: 'mmHg', status: 'normal' },
+                        { label: 'Heart Rate', value: '72', unit: 'bpm', status: 'normal' },
+                        { label: 'BMI', value: '24.5', unit: '', status: 'normal' },
+                        { label: 'Temperature', value: '98.6', unit: '°F', status: 'normal' }
+                    ],
+                    notes: 'Patient is in good overall health. Recommended continued exercise and balanced diet. Follow-up in 6 months for routine checkup.',
+                    doctor: currentPatient.physician, specialty: 'Primary Care'
+                },
+                {
+                    type: 'lab', title: 'Lipid Panel', date: 'January 15, 2024',
+                    summary: [
+                        { label: 'Total Cholesterol', value: '195', unit: 'mg/dL', status: 'normal' },
+                        { label: 'LDL', value: '110', unit: 'mg/dL', status: 'warning' },
+                        { label: 'HDL', value: '55', unit: 'mg/dL', status: 'normal' },
+                        { label: 'Triglycerides', value: '140', unit: 'mg/dL', status: 'normal' }
+                    ],
+                    notes: 'LDL slightly elevated. Recommend dietary modifications and increased physical activity. Recheck in 3 months.',
+                    doctor: 'Dr. Sarah Johnson', specialty: 'Primary Care'
+                },
+                {
+                    type: 'prescription', title: 'Prescription Summary', date: 'January 10, 2024',
+                    summary: [
+                        { label: 'Active Rx', value: '2', unit: '', status: 'normal' },
+                        { label: 'Refills Due', value: '1', unit: '', status: 'warning' },
+                        { label: 'Pharmacy', value: 'CVS', unit: '', status: 'normal' }
+                    ],
+                    notes: 'Current medications: Lisinopril 10mg daily for blood pressure management. Vitamin D 1000IU daily. Refill needed for Lisinopril.',
+                    doctor: currentPatient.physician, specialty: 'Primary Care'
+                }
+            ];
+
+            const container = document.getElementById('reportsList');
+            container.innerHTML = '';
+
+            reports.forEach(r => {
+                const card = document.createElement('div');
+                card.className = 'report-card';
+
+                const doctorInitials = sanitizeHTML(r.doctor).split(' ').map(n => n[0]).join('').substring(0,2);
+
+                card.innerHTML = `
+                    <div class="report-header ${sanitizeHTML(r.type)}">
+                        <div class="report-title">
+                            <h4>${sanitizeHTML(r.title)}</h4>
+                            <p>${sanitizeHTML(r.date)}</p>
+                        </div>
+                        <button class="action-btn" style="background: rgba(255,255,255,0.2); color: white;">📥 Download PDF</button>
+                    </div>
+                    <div class="report-body">
+                        <div class="report-summary">
+                            ${r.summary.map(s => `
+                                <div class="summary-item">
+                                    <div class="summary-value ${sanitizeHTML(s.status)}">${sanitizeHTML(s.value)}</div>
+                                    <div class="summary-label">${sanitizeHTML(s.label)} ${sanitizeHTML(s.unit)}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="report-details">
+                            <h5>Notes & Recommendations</h5>
+                            <p>${sanitizeHTML(r.notes)}</p>
+                        </div>
+                    </div>
+                    <div class="report-footer">
+                        <div class="report-doctor">
+                            <div class="doctor-avatar">${doctorInitials}</div>
+                            <div class="doctor-info">
+                                <div class="name">${sanitizeHTML(r.doctor)}</div>
+                                <div class="specialty">${sanitizeHTML(r.specialty)}</div>
+                            </div>
+                        </div>
+                        <button class="action-btn secondary">View Full Report</button>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Render Personal Info (with sanitization)
+        function renderPersonalInfo() {
+            const p = currentPatient;
+            const container = document.getElementById('personalInfoGrid');
+
+            container.innerHTML = `
+                <div class="info-card">
+                    <h4>👤 Personal Information</h4>
+                    <div class="info-row"><span class="info-label">Full Name</span><span class="info-value">${sanitizeHTML(p.firstName)} ${sanitizeHTML(p.lastName)}</span></div>
+                    <div class="info-row"><span class="info-label">Patient ID</span><span class="info-value">${sanitizeHTML(p.id)}</span></div>
+                    <div class="info-row"><span class="info-label">Date of Birth</span><span class="info-value">${sanitizeHTML(p.dob)}</span></div>
+                    <div class="info-row"><span class="info-label">Gender</span><span class="info-value">${sanitizeHTML(p.gender)}</span></div>
+                    <div class="info-row"><span class="info-label">Address</span><span class="info-value">${sanitizeHTML(p.address)}</span></div>
+                    <button class="action-btn secondary" style="margin-top: 15px; width: 100%;">✏️ Edit Information</button>
+                </div>
+                <div class="info-card">
+                    <h4>📱 Contact Information</h4>
+                    <div class="info-row"><span class="info-label">Phone Number</span><span class="info-value">${sanitizeHTML(p.phone)}</span></div>
+                    <div class="info-row"><span class="info-label">Email Address</span><span class="info-value">${sanitizeHTML(p.email)}</span></div>
+                    <div class="info-row"><span class="info-label">Emergency Contact</span><span class="info-value">${sanitizeHTML(p.emergencyContact)}</span></div>
+                    <div class="info-row"><span class="info-label">Emergency Phone</span><span class="info-value">${sanitizeHTML(p.emergencyPhone)}</span></div>
+                    <button class="action-btn secondary" style="margin-top: 15px; width: 100%;">✏️ Update Contact</button>
+                </div>
+                <div class="info-card">
+                    <h4>🏥 Insurance Information</h4>
+                    <div class="info-row"><span class="info-label">Insurance Provider</span><span class="info-value">${sanitizeHTML(p.insurance)}</span></div>
+                    <div class="info-row"><span class="info-label">Policy Number</span><span class="info-value">${sanitizeHTML(p.policyNumber)}</span></div>
+                    <div class="info-row"><span class="info-label">Verification Status</span><span class="info-value" style="color: #38a169;">✓ Verified</span></div>
+                    <div class="info-row"><span class="info-label">Coverage Type</span><span class="info-value">PPO</span></div>
+                    <button class="action-btn secondary" style="margin-top: 15px; width: 100%;">📤 Update Insurance</button>
+                </div>
+                <div class="info-card">
+                    <h4>🩺 Medical Information</h4>
+                    <div class="info-row"><span class="info-label">Primary Physician</span><span class="info-value">${sanitizeHTML(p.physician)}</span></div>
+                    <div class="info-row"><span class="info-label">Blood Type</span><span class="info-value">A+</span></div>
+                    <div class="info-row"><span class="info-label">Known Allergies</span><span class="info-value">Penicillin</span></div>
+                    <div class="info-row"><span class="info-label">Intake Status</span><span class="info-value">${parseInt(p.progress)}% Complete</span></div>
+                    <button class="action-btn primary" style="margin-top: 15px; width: 100%;">📋 Complete Intake Forms</button>
+                </div>
+            `;
+        }
+
+        // Patient Modal (admin only)
+        function openPatientModal() {
+            if (!hasAccess('admin_view')) {
+                logSecurityEvent('ACCESS_DENIED', 'Non-admin tried to open patient modal');
+                return;
+            }
+            document.getElementById('patientModal').classList.add('active');
+            logSecurityEvent('MODAL_OPEN', 'Admin opened patient selector');
+        }
+
+        function closePatientModal() {
+            document.getElementById('patientModal').classList.remove('active');
+        }
+
+        function renderPatientSelector() {
+            if (!hasAccess('admin_view')) {
+                return;
+            }
+
+            const container = document.getElementById('patientSelector');
+            container.innerHTML = '';
+
+            patients.forEach(p => {
+                const item = document.createElement('div');
+                item.className = `patient-select-item ${p.id === currentPatient.id ? 'selected' : ''}`;
+
+                const statusText = p.status === 'complete' ? 'Complete' : p.status === 'progress' ? 'In Progress' : 'Incomplete';
+
+                item.innerHTML = `
+                    <div class="patient-avatar avatar-${sanitizeHTML(p.gender.toLowerCase())}" style="width: 50px; height: 50px;">${sanitizeHTML(p.firstName[0])}${sanitizeHTML(p.lastName[0])}</div>
+                    <div style="flex: 1;">
+                        <h4 style="margin: 0; font-size: 1rem;">${sanitizeHTML(p.firstName)} ${sanitizeHTML(p.lastName)}</h4>
+                        <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">${sanitizeHTML(p.id)} • ${sanitizeHTML(p.dob)} • ${sanitizeHTML(p.insurance)}</p>
+                    </div>
+                    <span class="status-badge status-${sanitizeHTML(p.status)}" style="font-size: 0.75rem;">
+                        ${sanitizeHTML(statusText)}
+                    </span>
+                `;
+
+                item.onclick = () => selectPatient(p.id);
+                container.appendChild(item);
+            });
+        }
+
+        function selectPatient(id) {
+            if (!hasAccess('admin_view')) {
+                logSecurityEvent('ACCESS_DENIED', 'Non-admin tried to select patient');
+                return;
+            }
+
+            const patient = patients.find(p => p.id === sanitizeInput(id));
+            if (!patient) {
+                logSecurityEvent('INVALID_ACCESS', `Invalid patient ID in selectPatient: ${id}`);
+                return;
+            }
+
+            currentPatient = patient;
+            logSecurityEvent('PATIENT_SELECT', `Admin selected patient via modal: ${patient.id}`);
+
+            renderPatientSelector();
+            updateClientView();
+            closePatientModal();
+
+            // Switch to client view
+            document.querySelectorAll('.view-switch-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelector('.view-switch-btn:nth-child(2)').classList.add('active');
+            document.getElementById('clientView').classList.add('active');
+
+            document.getElementById('currentUserName').textContent = sanitizeHTML(currentPatient.firstName) + ' ' + sanitizeHTML(currentPatient.lastName);
+            document.getElementById('currentUserRole').textContent = 'Patient Portal';
+            document.getElementById('currentUserAvatar').textContent = sanitizeHTML(currentPatient.firstName[0]) + sanitizeHTML(currentPatient.lastName[0]);
+        }
+
+        function filterModalPatients() {
+            if (!hasAccess('admin_view')) {
+                return;
+            }
+
+            const rawSearch = document.getElementById('modalSearch').value;
+            const search = sanitizeInput(rawSearch, 50).toLowerCase();
+
+            document.querySelectorAll('.patient-select-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(search) ? 'flex' : 'none';
+            });
+        }
+
+        // Close modal on outside click
+        document.getElementById('patientModal').addEventListener('click', function(e) {
+            if (e.target === this) closePatientModal();
+        });
+    </script>
+</body>
+</html>
